@@ -54,7 +54,8 @@ def create_user():
 def delete_user(user_id):
     user = User.query.get_or_404(user_id)
 
-    db.session.delete(user)
-    db.session.commit()
+    if not user_id == 1:
+        db.session.delete(user)
+        db.session.commit()
 
     return jsonify({"message": f"User {user.username} deleted successfully."}), 200
