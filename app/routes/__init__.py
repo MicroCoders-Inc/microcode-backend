@@ -1,6 +1,6 @@
+from app.routes.index import index_bp
 from app.routes.health import health_bp
 from app.routes.users import users_bp
-from app.routes.index import index_bp
 
 
 def register_blueprints(app):

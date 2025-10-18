@@ -12,3 +12,17 @@ class Product(db.Model):
     price: Mapped[Decimal] = mapped_column(
         Numeric(precision=4, scale=2), nullable=False
     )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "price": self.price,
+            "created_at": self.created_at.isoformat(),
+        }
+
+    def __repr__(self):
+        return f"<User {self.name}>"
