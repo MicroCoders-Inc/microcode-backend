@@ -5,9 +5,8 @@ from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from app.database import db
 
-
-class Product(db.Model):
-    __tablename__ = "product"
+class Course(db.Model):
+    __tablename__ = "course"
     __table_args__ = (UniqueConstraint("name", name="course_name"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)

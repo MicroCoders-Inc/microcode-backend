@@ -18,16 +18,16 @@ class Blog(db.Model):
     description: Mapped[str] = mapped_column(String(100), nullable=False)
 
 
-def to_dict(self):
-    return {
-        "id": self.id,
-        "publication_date": self.publication_date,
-        "author_name": self.author_name,
-        "email": self.email,
-        "url": self.url,
-        "description": self.description,
-    }
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "publication_date": self.publication_date,
+            "author_name": self.author_name,
+            "email": self.email,
+            "url": self.url,
+            "description": self.description,
+        }
 
 
-def __repr__(self):
-    return f"<User {self.id}>"
+    def __repr__(self):
+        return f"<User {self.id}>"
