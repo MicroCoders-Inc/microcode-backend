@@ -10,3 +10,7 @@ __pycache__/
 .vscode/
 .idea/
 .DS_Store
+
+# Database
+main.db
+migrations/
