@@ -9,6 +9,7 @@ class Blog(db.Model):
     __tablename__ = "blog"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str] = mapped_column(String(100), nullable=True)
     publication_date: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
@@ -21,6 +22,7 @@ class Blog(db.Model):
     def to_dict(self):
         return {
             "id": self.id,
+            "title": self.title,
             "publication_date": self.publication_date,
             "author_name": self.author_name,
             "email": self.email,
