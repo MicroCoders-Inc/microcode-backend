@@ -5,8 +5,7 @@ from faker import Faker
 from decimal import Decimal
 import random
 
-quantity = 50
-
+quantity = 50  
 fake = Faker()
 app = create_app()
 
@@ -19,33 +18,38 @@ with app.app_context():
         user = User(username=fake.unique.user_name(), email=fake.unique.email())
         db.session.add(user)
 
-    # Create 50 fake courses
-    print("Creating 50 courses...")
-    topics = [
-        "Programming",
-        "Data Science",
-        "Web Development",
-        "Mobile Development",
-        "DevOps",
-        "Cybersecurity",
-        "AI/ML",
-        "Cloud Computing",
-        "Database",
-        "UI/UX",
-    ]
-    languages = ["English", "Spanish", "French", "German", "Portuguese", "Italian"]
-    levels = ["Beginner", "Intermediate", "Advanced", "Expert"]
 
-    for i in range(quantity):
-        course = Course(
-            name=f"{fake.catch_phrase()} - {fake.bs().title()} {i + 1}",
-            price=Decimal(str(round(random.uniform(9.99, 99.99), 2))),
-            discount=Decimal(str(round(random.uniform(0, 50), 2))),
-            language=random.choice(languages),
-            topic=random.choice(topics),
-            level=random.choice(levels),
-        )
-        db.session.add(course)
+    print("Creating courses with specific topics...")
+    topics = [
+        "frontend",
+        "backend",
+        "sql",
+        "git"
+    ]
+    languages = ["English", "Spanish"]
+    levels = ["Beginner", "Intermediate", "Advanced"]
+
+
+    for topic in topics:
+        if topic == "frontend":
+            course_names = ["React Basics", "CSS Basics", "HTML Basics", "JavaScript Basics"]
+        elif topic == "backend":
+            course_names = ["Python Basics", "Flask Basics"]
+        elif topic == "sql":
+            course_names = ["SQL Basics", "SQLAlchemy Basics", "SQLite Basics", "PostgreSQL Basics"]
+        elif topic == "git":
+            course_names = ["GitHub Basics", "Git CLI Basics", "GitHub Projects Basics"]
+
+        for name in course_names:
+            course = Course(
+                name=name,
+                price=Decimal(str(round(random.uniform(9.99, 99.99), 2))),
+                discount=Decimal(str(round(random.uniform(0, 50), 2))),
+                language=random.choice(languages),
+                topic=topic,
+                level=random.choice(levels),
+            )
+            db.session.add(course)
 
     # Create 50 fake blogs
     print("Creating 50 blogs...")

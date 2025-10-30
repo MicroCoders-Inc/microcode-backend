@@ -1,6 +1,6 @@
-from flask import jsonify
+import traceback
+from flask import jsonify, current_app
 from sqlalchemy.exc import IntegrityError
-
 
 def register_error_handlers(app):
     @app.errorhandler(400)
@@ -21,12 +21,25 @@ def register_error_handlers(app):
 
     @app.errorhandler(500)
     def internal_error(error):
-        return jsonify({"error": "Internal server error"}), 500
+        response = {"error": "Internal server error"}
+        if current_app.config.get("DEBUG", False):
+            response["message"] = str(error)
+            response["traceback"] = traceback.format_exc()
+        return jsonify(response), 500
 
     @app.errorhandler(IntegrityError)
     def handle_integrity_error(error):
-        return jsonify({"error": "Database integrity error"}), 409
+        response = {"error": "Database integrity error"}
+        if current_app.config.get("DEBUG", False):
+            response["message"] = str(error.orig)
+            response["statement"] = str(error.statement)
+        return jsonify(response), 409
 
     @app.errorhandler(Exception)
     def handle_exception(error):
-        return jsonify({"error": "An unexpected error occurred"}), 500
+        response = {"error": "An unexpected error occurred"}
+        if current_app.config.get("DEBUG", False):
+            response["type"] = type(error).__name__
+            response["message"] = str(error)
+            response["traceback"] = traceback.format_exc()
+        return jsonify(response), 500
