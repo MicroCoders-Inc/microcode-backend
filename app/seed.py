@@ -179,13 +179,6 @@ def image_for(name: str, topic: str) -> tuple[str, str]:
 with app.app_context():
     print("Seeding database...")
 
-    for _ in range(50):
-        username = fake.unique.user_name()
-        email = fake.unique.email()
-        existing_user = User.query.filter_by(email=email).first()
-        if not existing_user:
-            db.session.add(User(username=username, email=email))
-
     for name in FRONTEND_COURSES:
         course = Course.query.filter_by(name=name).first()
         if not course:
@@ -274,6 +267,7 @@ with app.app_context():
                 course.image_url = img_url
                 course.image_alt = img_alt
 
+  
     for _ in range(50):
         email = fake.unique.email()
         existing_blog = Blog.query.filter_by(email=email).first()
@@ -284,6 +278,37 @@ with app.app_context():
                     email=email,
                     url=fake.url(),
                     description=fake.sentence(nb_words=12),
+                )
+            )
+
+    db.session.commit()
+
+    all_course_ids = [course.id for course in Course.query.all()]
+    all_blog_ids = [blog.id for blog in Blog.query.all()]
+
+    for _ in range(50):
+        username = fake.unique.user_name()
+        email = fake.unique.email()
+        existing_user = User.query.filter_by(email=email).first()
+        if not existing_user:
+           
+            owned_courses = random.sample(
+                all_course_ids, k=random.randint(0, min(8, len(all_course_ids)))
+            )
+            favourite_courses = random.sample(
+                all_course_ids, k=random.randint(0, min(5, len(all_course_ids)))
+            )
+            saved_blogs = random.sample(
+                all_blog_ids, k=random.randint(0, min(10, len(all_blog_ids)))
+            )
+
+            db.session.add(
+                User(
+                    username=username,
+                    email=email,
+                    owned_courses=owned_courses,
+                    favourite_courses=favourite_courses,
+                    saved_blogs=saved_blogs,
                 )
             )
 
