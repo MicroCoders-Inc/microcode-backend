@@ -5,30 +5,28 @@ from faker import Faker
 from decimal import Decimal
 import random
 
-quantity = 50  
+quantity = 50
 fake = Faker()
 app = create_app()
 
 with app.app_context():
     print("Seeding database...")
 
-    # Create 50 fake users
-    print("Creating 50 users...")
+    # --- USERS ---
+    print("Creating 50 users (if not already exist)...")
     for _ in range(quantity):
-        user = User(username=fake.unique.user_name(), email=fake.unique.email())
-        db.session.add(user)
+        username = fake.unique.user_name()
+        email = fake.unique.email()
+        existing_user = User.query.filter_by(email=email).first()
+        if not existing_user:
+            db.session.add(User(username=username, email=email))
 
+    # --- COURSES ---
+    print("Creating courses with specific topics (avoiding duplicates)...")
 
-    print("Creating courses with specific topics...")
-    topics = [
-        "frontend",
-        "backend",
-        "sql",
-        "git"
-    ]
+    topics = ["frontend", "backend", "sql", "git"]
     languages = ["English", "Spanish"]
     levels = ["Beginner", "Intermediate", "Advanced"]
-
 
     for topic in topics:
         if topic == "frontend":
@@ -39,28 +37,36 @@ with app.app_context():
             course_names = ["SQL Basics", "SQLAlchemy Basics", "SQLite Basics", "PostgreSQL Basics"]
         elif topic == "git":
             course_names = ["GitHub Basics", "Git CLI Basics", "GitHub Projects Basics"]
+        else:
+            course_names = []
 
         for name in course_names:
-            course = Course(
-                name=name,
-                price=Decimal(str(round(random.uniform(9.99, 99.99), 2))),
-                discount=Decimal(str(round(random.uniform(0, 50), 2))),
-                language=random.choice(languages),
-                topic=topic,
-                level=random.choice(levels),
-            )
-            db.session.add(course)
+            existing_course = Course.query.filter_by(name=name).first()
+            if not existing_course:
+                course = Course(
+                    name=name,
+                    price=Decimal(str(round(random.uniform(9.99, 99.99), 2))),
+                    discount=Decimal(str(round(random.uniform(0, 50), 2))),
+                    language=random.choice(languages),
+                    topic=topic,
+                    level=random.choice(levels),
+                )
+                db.session.add(course)
 
-    # Create 50 fake blogs
-    print("Creating 50 blogs...")
+    # --- BLOGS ---
+    print("Creating 50 blogs (if not already exist)...")
     for _ in range(quantity):
-        blog = Blog(
-            author_name=fake.name(),
-            email=fake.email(),
-            url=fake.url(),
-            description=fake.sentence(nb_words=12),
-        )
-        db.session.add(blog)
+        email = fake.unique.email()
+        existing_blog = Blog.query.filter_by(email=email).first()
+        if not existing_blog:
+            blog = Blog(
+                author_name=fake.name(),
+                email=email,
+                url=fake.url(),
+                description=fake.sentence(nb_words=12),
+            )
+            db.session.add(blog)
 
+    # --- COMMIT ---
     db.session.commit()
-    print("✓ Done! Created 50 users, 50 courses, and 50 blogs.")
+    print("✓ Done! Database seeding complete without duplicates.")
