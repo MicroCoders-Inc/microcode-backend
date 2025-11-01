@@ -13,4 +13,3 @@ __pycache__/
 
 # Database
 main.db
-migrations/
