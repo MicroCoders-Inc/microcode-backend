@@ -4,69 +4,288 @@ from app.models import User, Course, Blog
 from faker import Faker
 from decimal import Decimal
 import random
+import re
 
-quantity = 50
 fake = Faker()
 app = create_app()
+
+TAG_COLOR_REGISTRY = {
+    "HTML": "#E34F26",
+    "CSS": "#1572B6",
+    "JavaScript": "#C9AF00",
+    "React": "#17829C",
+    "JSX": "#6A53C4",
+    "Bootstrap": "#7952B3",
+    "Tailwind": "#0F8CB8",
+    "UI/UX": "#C12675",
+    "Accessibility": "#138F6F",
+    "Python": "#3776AB",
+    "Flask": "#2C3E50",
+    "Node.js": "#3C873A",
+    "Express.js": "#495057",
+    "REST API": "#0D6EFD",
+    "Auth": "#DC3545",
+    "API Design": "#0A6D8F",
+    "Django": "#092E20",
+    "Django REST Framework": "#7A0000",
+    "SQL": "#0064A5",
+    "PostgreSQL": "#27506D",
+    "SQLite": "#0F5C96",
+    "Migrations": "#C35900",
+    "SQLAlchemy": "#6C2F82",
+    "ORM": "#4A27AD",
+    "Git": "#F05033",
+    "GitHub": "#2F81F7",
+    "GitHub Projects": "#1E6F36",
+    "Branching": "#146C43",
+    "Merge Conflicts": "#C13E5D",
+    "Git Flow": "#C67800",
+}
+
+TOPIC_TAGS = {
+    "frontend": [
+        "HTML",
+        "CSS",
+        "JavaScript",
+        "React",
+        "JSX",
+        "Bootstrap",
+        "Tailwind",
+        "UI/UX",
+        "Accessibility",
+    ],
+    "backend": [
+        "Python",
+        "Flask",
+        "Node.js",
+        "Express.js",
+        "REST API",
+        "Auth",
+        "API Design",
+        "Django",
+        "Django REST Framework",
+    ],
+    "database": [
+        "SQL",
+        "PostgreSQL",
+        "SQLite",
+        "Migrations",
+        "SQLAlchemy",
+        "ORM",
+    ],
+    "git": [
+        "Git",
+        "GitHub",
+        "GitHub Projects",
+        "Branching",
+        "Merge Conflicts",
+        "Git Flow",
+    ],
+}
+
+FRONTEND_COURSES = [
+    "HTML Landing Pages",
+    "CSS Flexbox Mastery",
+    "CSS Grid Layouts",
+    "JavaScript DOM Basics",
+    "DOM Event Handling",
+    "React Components 101",
+    "React Hooks Crash",
+    "Bootstrap UI Components",
+    "Tailwind Utility Guide",
+    "Form Validation JS",
+    "Frontend Accessibility",
+    "React Router Basics",
+    "Frontend Debugging",
+    "Performance Optimization",
+    "Bootstrap Form Design",
+]
+
+BACKEND_COURSES = [
+    "Python Web Backend",
+    "Flask REST API",
+    "JWT Auth Flask",
+    "Flask Blueprint Basics",
+    "Node Fundamentals",
+    "Express Routing Patterns",
+    "Express Middleware",
+    "REST Error Handling",
+    "File Upload APIs",
+    "Django Model Basics",
+    "Django Views Routing",
+    "DRF Serializers Intro",
+    "API Auth Patterns",
+    "API Rate Limiting",
+    "Flask Webhooks",
+]
+
+DATABASE_COURSES = [
+    "SQL Fundamentals",
+    "SQL Joins Mastery",
+    "SQL Aggregations",
+    "PostgreSQL Setup",
+    "SQLite Prototyping",
+    "SQLAlchemy Models",
+    "SQLAlchemy Relations",
+    "Alembic Migrations",
+    "Transaction Handling",
+    "Data Seeding",
+    "Data Validation",
+    "Database Design",
+    "Many To Many",
+    "Database Security",
+    "Query Optimization",
+]
+
+GIT_COURSES = [
+    "Git Basics",
+    "Branching Strategies",
+    "GitHub Pull Requests",
+    "Merge Conflicts",
+    "Interactive Rebase",
+    "Git Tags Releases",
+    "Team Git Workflow",
+    "GitHub Actions Intro",
+    "Monorepo Workflow",
+    "Submodule Management",
+    "Git Bisect Debugging",
+    "Stash Patch Workflow",
+    "Git Hooks",
+    "Code Review Workflow",
+    "GitHub Projects",
+]
+
+
+def build_tags_for_course(topic: str) -> list[dict[str, str]]:
+    topic_labels = TOPIC_TAGS.get(topic, [])
+    pick_count = min(len(topic_labels), random.randint(2, 4))
+    picked = random.sample(topic_labels, k=pick_count)
+    return [{"label": label, "color": TAG_COLOR_REGISTRY[label]} for label in picked]
+
+
+def slugify(name: str) -> str:
+    s = name.lower()
+    s = re.sub(r"[^a-z0-9]+", "-", s)
+    s = s.strip("-")
+    return s
+
+
+def image_for(name: str, topic: str) -> tuple[str, str]:
+    url = "https://placehold.co/400x225"
+    alt = f"{topic.capitalize()} course – {name}"
+    return url, alt
+
 
 with app.app_context():
     print("Seeding database...")
 
-    # --- USERS ---
-    print("Creating 50 users (if not already exist)...")
-    for _ in range(quantity):
+    for _ in range(50):
         username = fake.unique.user_name()
         email = fake.unique.email()
         existing_user = User.query.filter_by(email=email).first()
         if not existing_user:
             db.session.add(User(username=username, email=email))
 
-    # --- COURSES ---
-    print("Creating courses with specific topics (avoiding duplicates)...")
-
-    topics = ["frontend", "backend", "sql", "git"]
-    languages = ["English", "Spanish"]
-    levels = ["Beginner", "Intermediate", "Advanced"]
-
-    for topic in topics:
-        if topic == "frontend":
-            course_names = ["React Basics", "CSS Basics", "HTML Basics", "JavaScript Basics"]
-        elif topic == "backend":
-            course_names = ["Python Basics", "Flask Basics"]
-        elif topic == "sql":
-            course_names = ["SQL Basics", "SQLAlchemy Basics", "SQLite Basics", "PostgreSQL Basics"]
-        elif topic == "git":
-            course_names = ["GitHub Basics", "Git CLI Basics", "GitHub Projects Basics"]
-        else:
-            course_names = []
-
-        for name in course_names:
-            existing_course = Course.query.filter_by(name=name).first()
-            if not existing_course:
-                course = Course(
+    for name in FRONTEND_COURSES:
+        course = Course.query.filter_by(name=name).first()
+        if not course:
+            img_url, img_alt = image_for(name, "frontend")
+            db.session.add(
+                Course(
                     name=name,
-                    price=Decimal(str(round(random.uniform(9.99, 99.99), 2))),
-                    discount=Decimal(str(round(random.uniform(0, 50), 2))),
-                    language=random.choice(languages),
-                    topic=topic,
-                    level=random.choice(levels),
+                    price=Decimal(str(round(random.uniform(4.99, 9.99), 2))),
+                    discount=Decimal(str(round(random.uniform(0, 40), 2))),
+                    topic="frontend",
+                    level=random.choice(["Beginner", "Intermediate", "Advanced"]),
+                    tags=build_tags_for_course("frontend"),
+                    image_url=img_url,
+                    image_alt=img_alt,
                 )
-                db.session.add(course)
+            )
+        else:
+            if course.image_url is None or course.image_alt is None:
+                img_url, img_alt = image_for(name, "frontend")
+                course.image_url = img_url
+                course.image_alt = img_alt
 
-    # --- BLOGS ---
-    print("Creating 50 blogs (if not already exist)...")
-    for _ in range(quantity):
+    for name in BACKEND_COURSES:
+        course = Course.query.filter_by(name=name).first()
+        if not course:
+            img_url, img_alt = image_for(name, "backend")
+            db.session.add(
+                Course(
+                    name=name,
+                    price=Decimal(str(round(random.uniform(4.99, 9.99), 2))),
+                    discount=Decimal(str(round(random.uniform(0, 40), 2))),
+                    topic="backend",
+                    level=random.choice(["Beginner", "Intermediate", "Advanced"]),
+                    tags=build_tags_for_course("backend"),
+                    image_url=img_url,
+                    image_alt=img_alt,
+                )
+            )
+        else:
+            if course.image_url is None or course.image_alt is None:
+                img_url, img_alt = image_for(name, "backend")
+                course.image_url = img_url
+                course.image_alt = img_alt
+
+    for name in DATABASE_COURSES:
+        course = Course.query.filter_by(name=name).first()
+        if not course:
+            img_url, img_alt = image_for(name, "database")
+            db.session.add(
+                Course(
+                    name=name,
+                    price=Decimal(str(round(random.uniform(4.99, 9.99), 2))),
+                    discount=Decimal(str(round(random.uniform(0, 40), 2))),
+                    topic="database",
+                    level=random.choice(["Beginner", "Intermediate", "Advanced"]),
+                    tags=build_tags_for_course("database"),
+                    image_url=img_url,
+                    image_alt=img_alt,
+                )
+            )
+        else:
+            if course.image_url is None or course.image_alt is None:
+                img_url, img_alt = image_for(name, "database")
+                course.image_url = img_url
+                course.image_alt = img_alt
+
+    for name in GIT_COURSES:
+        course = Course.query.filter_by(name=name).first()
+        if not course:
+            img_url, img_alt = image_for(name, "git")
+            db.session.add(
+                Course(
+                    name=name,
+                    price=Decimal(str(round(random.uniform(4.99, 9.99), 2))),
+                    discount=Decimal(str(round(random.uniform(0, 40), 2))),
+                    topic="git",
+                    level=random.choice(["Beginner", "Intermediate", "Advanced"]),
+                    tags=build_tags_for_course("git"),
+                    image_url=img_url,
+                    image_alt=img_alt,
+                )
+            )
+        else:
+            if course.image_url is None or course.image_alt is None:
+                img_url, img_alt = image_for(name, "git")
+                course.image_url = img_url
+                course.image_alt = img_alt
+
+    for _ in range(50):
         email = fake.unique.email()
         existing_blog = Blog.query.filter_by(email=email).first()
         if not existing_blog:
-            blog = Blog(
-                author_name=fake.name(),
-                email=email,
-                url=fake.url(),
-                description=fake.sentence(nb_words=12),
+            db.session.add(
+                Blog(
+                    author_name=fake.name(),
+                    email=email,
+                    url=fake.url(),
+                    description=fake.sentence(nb_words=12),
+                )
             )
-            db.session.add(blog)
 
-    # --- COMMIT ---
     db.session.commit()
-    print("✓ Done! Database seeding complete without duplicates.")
+    print("✓ Done.")
