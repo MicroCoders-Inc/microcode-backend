@@ -1,8 +1,8 @@
 from typing import Any
 from datetime import datetime
 from decimal import Decimal
-from sqlalchemy import JSON, String, DateTime, Numeric, func, UniqueConstraint
-from sqlalchemy.ext.mutable import MutableList
+from sqlalchemy import JSON, String, DateTime, Numeric, Text, func, UniqueConstraint
+from sqlalchemy.ext.mutable import MutableList, MutableDict
 from sqlalchemy.orm import Mapped, mapped_column
 from app.database import db
 
@@ -21,10 +21,15 @@ class Course(db.Model):
     )
     topic: Mapped[str] = mapped_column(String(100), nullable=False)
     level: Mapped[str] = mapped_column(String(100), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
     tags: Mapped[list[dict[str, Any]]] = mapped_column(
         MutableList.as_mutable(JSON),
         nullable=False,
         default=list,
+    )
+    summary: Mapped[dict[str, Any] | None] = mapped_column(
+        MutableDict.as_mutable(JSON),
+        nullable=True,
     )
     image_url: Mapped[str | None] = mapped_column(String(255), nullable=True)
     image_alt: Mapped[str | None] = mapped_column(String(255), nullable=True)
@@ -43,7 +48,9 @@ class Course(db.Model):
             "discount": self.discount,
             "topic": self.topic,
             "level": self.level,
+            "description": self.description,
             "tags": self.tags,
+            "summary": self.summary,
             "image_url": self.image_url,
             "image_alt": self.image_alt,
             "updated_at": self.updated_at,
