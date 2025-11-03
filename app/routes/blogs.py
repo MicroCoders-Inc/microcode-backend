@@ -7,7 +7,9 @@ blogs_bp = Blueprint("blogs", __name__)
 
 @blogs_bp.route("/blogs", methods=["GET"])
 def get_blogs():
-    return jsonify({"status": "ok"})
+    blogs = Blog.query.order_by(Blog.publication_date.desc()).all()
+    return jsonify([blog.to_dict() for blog in blogs])
+
 
 @blogs_bp.route("/blogs", methods=["POST"])
 def create_blog():
@@ -17,7 +19,7 @@ def create_blog():
         author_name=data.get("author_name"),
         email=data.get("email"),
         url=data.get("url"),
-        description=data.get("description")
+        description=data.get("description"),
     )
     db.session.add(new_blog)
     db.session.commit()
