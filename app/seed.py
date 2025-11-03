@@ -155,6 +155,39 @@ GIT_COURSES = [
     "GitHub Projects",
 ]
 
+BLOG_TITLES = [
+    "Mastering React Hooks",
+    "CSS Grid Tutorial",
+    "REST API Best Practices",
+    "Git Workflow Tips",
+    "Database Design Patterns",
+    "JavaScript Performance Tips",
+    "Authentication Security Guide",
+    "Flask Blueprint Strategies",
+    "Responsive Design Techniques",
+    "SQL Query Optimization",
+    "React State Management",
+    "Node.js Error Handling",
+    "Modern CSS Features",
+    "API Documentation Tips",
+    "PostgreSQL Advanced Queries",
+    "Frontend Testing Strategies",
+    "Django Model Relationships",
+    "Version Control Mastery",
+    "Web Accessibility Guide",
+    "Python Decorators Explained",
+    "Tailwind CSS Tricks",
+    "Express Middleware Patterns",
+    "Database Migration Strategies",
+    "GitHub Actions Workflows",
+    "React Component Patterns",
+    "SQLAlchemy Best Practices",
+    "Backend Security Tips",
+    "Git Rebase Guide",
+    "Frontend Build Tools",
+    "API Rate Limiting",
+]
+
 
 def build_tags_for_course(topic: str) -> list[dict[str, str]]:
     topic_labels = TOPIC_TAGS.get(topic, [])
@@ -163,22 +196,33 @@ def build_tags_for_course(topic: str) -> list[dict[str, str]]:
     return [{"label": label, "color": TAG_COLOR_REGISTRY[label]} for label in picked]
 
 
-def slugify(name: str) -> str:
-    s = name.lower()
-    s = re.sub(r"[^a-z0-9]+", "-", s)
-    s = s.strip("-")
-    return s
-
-
 def image_for(name: str, topic: str) -> tuple[str, str]:
-    url = "https://placehold.co/400x225"
-    alt = f"{topic.capitalize()} course – {name}"
+    url = "https://placehold.co/400x300"
+    alt = f"{topic.capitalize()} course — {name}"
     return url, alt
+
+
+def build_tags_for_blog(title: str) -> list[dict[str, str]]:
+    """Build tags based on blog title keywords"""
+    title_lower = title.lower()
+    tags = []
+
+    for tag, color in TAG_COLOR_REGISTRY.items():
+        if tag.lower() in title_lower:
+            tags.append({"label": tag, "color": color})
+
+    if not tags:
+        all_tags = list(TAG_COLOR_REGISTRY.items())
+        selected = random.sample(all_tags, k=random.randint(2, 3))
+        tags = [{"label": label, "color": color} for label, color in selected]
+
+    return tags
 
 
 with app.app_context():
     print("Seeding database...")
 
+    # Seed Frontend Courses
     for name in FRONTEND_COURSES:
         course = Course.query.filter_by(name=name).first()
         if not course:
@@ -201,6 +245,7 @@ with app.app_context():
                 course.image_url = img_url
                 course.image_alt = img_alt
 
+    # Seed Backend Courses
     for name in BACKEND_COURSES:
         course = Course.query.filter_by(name=name).first()
         if not course:
@@ -223,6 +268,7 @@ with app.app_context():
                 course.image_url = img_url
                 course.image_alt = img_alt
 
+    # Seed Database Courses
     for name in DATABASE_COURSES:
         course = Course.query.filter_by(name=name).first()
         if not course:
@@ -245,6 +291,7 @@ with app.app_context():
                 course.image_url = img_url
                 course.image_alt = img_alt
 
+    # Seed Git Courses
     for name in GIT_COURSES:
         course = Course.query.filter_by(name=name).first()
         if not course:
@@ -267,39 +314,49 @@ with app.app_context():
                 course.image_url = img_url
                 course.image_alt = img_alt
 
-  
-    for _ in range(50):
+    db.session.commit()
+
+    # Seed 30 Blogs
+    print("Seeding blogs...")
+    for i in range(30):
+        title = BLOG_TITLES[i]
         email = fake.unique.email()
-        existing_blog = Blog.query.filter_by(email=email).first()
+        existing_blog = Blog.query.filter_by(title=title).first()
+
         if not existing_blog:
             db.session.add(
                 Blog(
+                    title=title,
                     author_name=fake.name(),
                     email=email,
                     url=fake.url(),
-                    description=fake.sentence(nb_words=12),
+                    description=fake.sentence(nb_words=10),
+                    tags=build_tags_for_blog(title),
                 )
             )
 
     db.session.commit()
 
+    # Get all IDs for user relationships
     all_course_ids = [course.id for course in Course.query.all()]
     all_blog_ids = [blog.id for blog in Blog.query.all()]
 
-    for _ in range(50):
+    # Seed 30 Users
+    print("Seeding users...")
+    for _ in range(30):
         username = fake.unique.user_name()
         email = fake.unique.email()
         existing_user = User.query.filter_by(email=email).first()
+
         if not existing_user:
-           
             owned_courses = random.sample(
-                all_course_ids, k=random.randint(0, min(8, len(all_course_ids)))
+                all_course_ids, k=random.randint(1, min(10, len(all_course_ids)))
             )
             favourite_courses = random.sample(
-                all_course_ids, k=random.randint(0, min(5, len(all_course_ids)))
+                all_course_ids, k=random.randint(1, min(6, len(all_course_ids)))
             )
             saved_blogs = random.sample(
-                all_blog_ids, k=random.randint(0, min(10, len(all_blog_ids)))
+                all_blog_ids, k=random.randint(1, min(12, len(all_blog_ids)))
             )
 
             db.session.add(
@@ -313,4 +370,4 @@ with app.app_context():
             )
 
     db.session.commit()
-    print("✓ Done.")
+    print("✓ Done. Seeded 60 courses, 30 blogs, and 30 users.")
