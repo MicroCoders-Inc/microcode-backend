@@ -16,6 +16,7 @@ class User(db.Model):
     username: Mapped[str] = mapped_column(String(80), nullable=False)
     email: Mapped[str] = mapped_column(String(120), nullable=False)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+    profile_picture: Mapped[str | None] = mapped_column(String(255), nullable=True)
     owned_courses: Mapped[list[int]] = mapped_column(
         MutableList.as_mutable(JSON),
         default=list,
@@ -40,6 +41,7 @@ class User(db.Model):
             "id": self.id,
             "username": self.username,
             "email": self.email,
+            "profile_picture": self.profile_picture,
             "created_at": self.created_at.isoformat(),
             "owned_courses": self.owned_courses or [],
             "favourite_courses": self.favourite_courses or [],
