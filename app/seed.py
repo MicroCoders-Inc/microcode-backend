@@ -962,6 +962,8 @@ with app.app_context():
                     url=fake.url(),
                     description=fake.sentence(nb_words=10),
                     tags=build_tags_for_blog(title),
+                    image_url="https://placehold.co/400x300",
+                    image_alt=f"Blog post - {title}",
                 )
             )
 

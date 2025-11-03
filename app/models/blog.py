@@ -24,6 +24,8 @@ class Blog(db.Model):
         nullable=False,
         default=list,
     )
+    image_url: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    image_alt: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     def to_dict(self):
         return {
@@ -35,6 +37,8 @@ class Blog(db.Model):
             "url": self.url,
             "description": self.description,
             "tags": self.tags,
+            "image_url": self.image_url,
+            "image_alt": self.image_alt,
         }
 
     def __repr__(self):
