@@ -13,8 +13,8 @@ class User(db.Model):
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    username: Mapped[str] = mapped_column(String(80), nullable=False)
-    email: Mapped[str] = mapped_column(String(120), nullable=False)
+    username: Mapped[str] = mapped_column(String(80), nullable=False, index=True)
+    email: Mapped[str] = mapped_column(String(120), nullable=False, index=True)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     profile_picture: Mapped[str | None] = mapped_column(String(255), nullable=True)
     owned_courses: Mapped[list[int]] = mapped_column(

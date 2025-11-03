@@ -1,0 +1,22 @@
+"""
+Application constants.
+"""
+
+# JWT Token Configuration
+JWT_EXPIRATION_DAYS = 7
+
+# File Upload Configuration
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB in bytes
+ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
+
+# User Validation
+MIN_USERNAME_LENGTH = 3
+MIN_PASSWORD_LENGTH = 6
+MAX_USERNAME_LENGTH = 80
+MAX_EMAIL_LENGTH = 120
+
+# String Field Limits
+MAX_BLOG_TITLE_LENGTH = 100
+MAX_BLOG_DESCRIPTION_LENGTH = 500
+MAX_COURSE_NAME_LENGTH = 100
+MAX_CONTACT_MESSAGE_LENGTH = 1000

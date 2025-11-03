@@ -19,7 +19,7 @@ class Course(db.Model):
     discount: Mapped[Decimal] = mapped_column(
         Numeric(precision=4, scale=2), nullable=False
     )
-    topic: Mapped[str] = mapped_column(String(100), nullable=False)
+    topic: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     level: Mapped[str] = mapped_column(String(100), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
     tags: Mapped[list[dict[str, Any]]] = mapped_column(

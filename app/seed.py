@@ -1003,4 +1003,26 @@ with app.app_context():
             )
 
     db.session.commit()
+
+    # Create permanent admin user
+    admin_email = "admin@microcode.com"
+    admin_user = User.query.filter_by(email=admin_email).first()
+
+    if not admin_user:
+        print("Creating admin user...")
+        db.session.add(
+            User(
+                username="microcode_admin",
+                email=admin_email,
+                password_hash=generate_password_hash("iamadmin123"),
+                owned_courses=all_course_ids,  # Admin owns all courses
+                favourite_courses=[],
+                saved_blogs=[],
+            )
+        )
+        db.session.commit()
+        print("✓ Admin user created (admin@microcode.com)")
+    else:
+        print("✓ Admin user already exists")
+
     print("✓ Done. Seeded 40 courses, 30 blogs, and 30 users.")

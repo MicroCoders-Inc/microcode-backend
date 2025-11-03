@@ -1,8 +1,6 @@
-from datetime import datetime
 from decimal import Decimal
-from sqlalchemy import String, DateTime, Numeric, func, UniqueConstraint
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
+from sqlalchemy import Numeric, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column
 from app.database import db
 
 
@@ -10,9 +8,9 @@ class Article(db.Model):
     __tablename__ = "article"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    shop_id: Mapped[int] = mapped_column(primary_key=True)
-    course_id: Mapped[int] = mapped_column(primary_key=True)
-    quantity: Mapped[int] = mapped_column(primary_key=True)
+    shop_id: Mapped[int] = mapped_column(ForeignKey("shop.id"), nullable=False)
+    course_id: Mapped[int] = mapped_column(ForeignKey("course.id"), nullable=False)
+    quantity: Mapped[int] = mapped_column(nullable=False, default=1)
     price: Mapped[Decimal] = mapped_column(
         Numeric(precision=4, scale=2), nullable=False
     )
@@ -31,4 +29,4 @@ class Article(db.Model):
         }
 
     def __repr__(self):
-        return f"<User {self.id}>"
+        return f"<Article {self.id}>"

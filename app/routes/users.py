@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from app.database import db
 from app.models import User
+from app.auth_middleware import token_required
 
 
 users_bp = Blueprint("users", __name__)
@@ -70,8 +71,13 @@ def create_user():
 
 
 @users_bp.route("/users/<int:user_id>/profile", methods=["GET"])
-def get_user_profile(user_id):
+@token_required
+def get_user_profile(current_user_id, user_id):
     """Get user profile with expanded course and blog details"""
+    # Verify user can only access their own profile
+    if current_user_id != user_id:
+        return jsonify({"error": "Unauthorized: You can only access your own profile"}), 403
+
     user = User.query.get_or_404(user_id)
 
     user_data = user.to_dict()
@@ -95,7 +101,12 @@ def get_owned_courses(user_id):
 
 
 @users_bp.route("/users/<int:user_id>/owned-courses", methods=["POST"])
-def add_owned_course(user_id):
+@token_required
+def add_owned_course(current_user_id, user_id):
+    # Verify user can only modify their own data
+    if current_user_id != user_id:
+        return jsonify({"error": "Unauthorized: You can only modify your own courses"}), 403
+
     user = User.query.get_or_404(user_id)
     data = request.get_json()
 
@@ -117,7 +128,12 @@ def add_owned_course(user_id):
 @users_bp.route(
     "/users/<int:user_id>/owned-courses/<int:course_id>", methods=["DELETE"]
 )
-def remove_owned_course(user_id, course_id):
+@token_required
+def remove_owned_course(current_user_id, user_id, course_id):
+    # Verify user can only modify their own data
+    if current_user_id != user_id:
+        return jsonify({"error": "Unauthorized: You can only modify your own courses"}), 403
+
     user = User.query.get_or_404(user_id)
 
     if user.owned_courses and course_id in user.owned_courses:
@@ -143,7 +159,12 @@ def get_favourite_courses(user_id):
 
 
 @users_bp.route("/users/<int:user_id>/favourite-courses", methods=["POST"])
-def add_favourite_course(user_id):
+@token_required
+def add_favourite_course(current_user_id, user_id):
+    # Verify user can only modify their own data
+    if current_user_id != user_id:
+        return jsonify({"error": "Unauthorized: You can only modify your own favourites"}), 403
+
     user = User.query.get_or_404(user_id)
     data = request.get_json()
 
@@ -165,7 +186,12 @@ def add_favourite_course(user_id):
 @users_bp.route(
     "/users/<int:user_id>/favourite-courses/<int:course_id>", methods=["DELETE"]
 )
-def remove_favourite_course(user_id, course_id):
+@token_required
+def remove_favourite_course(current_user_id, user_id, course_id):
+    # Verify user can only modify their own data
+    if current_user_id != user_id:
+        return jsonify({"error": "Unauthorized: You can only modify your own favourites"}), 403
+
     user = User.query.get_or_404(user_id)
 
     if user.favourite_courses and course_id in user.favourite_courses:
@@ -189,7 +215,12 @@ def get_saved_blogs(user_id):
 
 
 @users_bp.route("/users/<int:user_id>/saved-blogs", methods=["POST"])
-def add_saved_blog(user_id):
+@token_required
+def add_saved_blog(current_user_id, user_id):
+    # Verify user can only modify their own data
+    if current_user_id != user_id:
+        return jsonify({"error": "Unauthorized: You can only modify your own saved blogs"}), 403
+
     user = User.query.get_or_404(user_id)
     data = request.get_json()
 
@@ -209,7 +240,12 @@ def add_saved_blog(user_id):
 
 
 @users_bp.route("/users/<int:user_id>/saved-blogs/<int:blog_id>", methods=["DELETE"])
-def remove_saved_blog(user_id, blog_id):
+@token_required
+def remove_saved_blog(current_user_id, user_id, blog_id):
+    # Verify user can only modify their own data
+    if current_user_id != user_id:
+        return jsonify({"error": "Unauthorized: You can only modify your own saved blogs"}), 403
+
     user = User.query.get_or_404(user_id)
 
     if user.saved_blogs and blog_id in user.saved_blogs:
@@ -238,7 +274,12 @@ def get_user(user_id):
 
 
 @users_bp.route("/users/<int:user_id>", methods=["DELETE"])
-def delete_user(user_id):
+@token_required
+def delete_user(current_user_id, user_id):
+    # Verify user can only delete their own account
+    if current_user_id != user_id:
+        return jsonify({"error": "Unauthorized: You can only delete your own account"}), 403
+
     user = User.query.get_or_404(user_id)
     if user_id != 1:
         db.session.delete(user)

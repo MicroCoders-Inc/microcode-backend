@@ -5,6 +5,8 @@ import datetime
 import os
 from app.database import db
 from app.models import User
+from app.validation import validate_email, validate_username, validate_password
+from app.constants import JWT_EXPIRATION_DAYS
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -22,15 +24,22 @@ def signup():
     if not username or not email or not password:
         return jsonify({"error": "All fields are required"}), 400
 
-    if len(username) < 3:
-        return jsonify({"error": "Username must be at least 3 characters"}), 400
+    # Validate username
+    is_valid, error = validate_username(username)
+    if not is_valid:
+        return jsonify({"error": error}), 400
 
-    if len(password) < 6:
-        return jsonify({"error": "Password must be at least 6 characters"}), 400
+    # Validate email
+    is_valid, error = validate_email(email)
+    if not is_valid:
+        return jsonify({"error": error}), 400
 
-    if "@" not in email:
-        return jsonify({"error": "Invalid email format"}), 400
+    # Validate password
+    is_valid, error = validate_password(password)
+    if not is_valid:
+        return jsonify({"error": error}), 400
 
+    # Check uniqueness
     if User.query.filter_by(username=username).first():
         return jsonify({"error": "Username already exists"}), 409
 
@@ -56,7 +65,7 @@ def signup():
     token = jwt.encode(
         {
             "user_id": user.id,
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(days=7),
+            "exp": datetime.datetime.utcnow() + datetime.timedelta(days=JWT_EXPIRATION_DAYS),
         },
         SECRET_KEY,
         algorithm="HS256",
@@ -84,7 +93,7 @@ def login():
     token = jwt.encode(
         {
             "user_id": user.id,
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(days=7),
+            "exp": datetime.datetime.utcnow() + datetime.timedelta(days=JWT_EXPIRATION_DAYS),
         },
         SECRET_KEY,
         algorithm="HS256",

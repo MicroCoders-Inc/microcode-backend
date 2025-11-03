@@ -1,15 +1,14 @@
 from datetime import datetime
 from decimal import Decimal
-from sqlalchemy import String, DateTime, Numeric, func, UniqueConstraint
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
+from sqlalchemy import String, DateTime, Numeric, ForeignKey, func
+from sqlalchemy.orm import Mapped, mapped_column
 from app.database import db
 
 class Shop(db.Model):
     __tablename__ = "shop"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     article: Mapped[str] = mapped_column(String(100), nullable=False)
     price: Mapped[Decimal] = mapped_column(
         Numeric(precision=4, scale=2), nullable=False
@@ -37,4 +36,4 @@ class Shop(db.Model):
 
 
     def __repr__(self):
-        return f"<User {self.id}>"
+        return f"<Shop {self.id}>"
