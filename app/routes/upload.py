@@ -54,8 +54,12 @@ def upload_profile_picture(user_id):
             400,
         )
 
-    # Generate unique filename
-    file_extension = file.filename.rsplit(".", 1)[1].lower()
+    # Secure the filename and extract extension
+    secured_filename = secure_filename(file.filename)
+    if not secured_filename or "." not in secured_filename:
+        return jsonify({"error": "Invalid filename"}), 400
+
+    file_extension = secured_filename.rsplit(".", 1)[1].lower()
     unique_filename = f"{user_id}_{uuid.uuid4().hex}.{file_extension}"
     filepath = os.path.join(UPLOAD_FOLDER, unique_filename)
 
