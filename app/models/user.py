@@ -11,10 +11,11 @@ class User(db.Model):
         UniqueConstraint("username", name="username"),
         UniqueConstraint("email", name="user_email"),
     )
-    
+
     id: Mapped[int] = mapped_column(primary_key=True)
     username: Mapped[str] = mapped_column(String(80), nullable=False)
     email: Mapped[str] = mapped_column(String(120), nullable=False)
+    password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     owned_courses: Mapped[list[int]] = mapped_column(
         MutableList.as_mutable(JSON),
         default=list,
@@ -26,7 +27,7 @@ class User(db.Model):
     saved_blogs: Mapped[list[int]] = mapped_column(
         MutableList.as_mutable(JSON),
         default=list,
-    ) 
+    )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )

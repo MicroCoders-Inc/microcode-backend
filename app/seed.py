@@ -3,6 +3,7 @@ from app.database import db
 from app.models import User, Course, Blog
 from faker import Faker
 from decimal import Decimal
+from werkzeug.security import generate_password_hash
 import random
 
 fake = Faker()
@@ -992,6 +993,7 @@ with app.app_context():
                 User(
                     username=username,
                     email=email,
+                    password_hash=generate_password_hash("password123"),
                     owned_courses=owned_courses,
                     favourite_courses=favourite_courses,
                     saved_blogs=saved_blogs,
