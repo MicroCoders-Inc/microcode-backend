@@ -12,6 +12,7 @@ python-dotenv = "*"
 colorama = "*"
 pyjwt = "*"
 gunicorn = "*"
+psycopg2-binary = "*"
 
 [dev-packages]
 pytest = "*"
