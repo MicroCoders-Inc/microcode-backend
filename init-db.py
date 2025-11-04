@@ -19,13 +19,25 @@ with app.app_context():
         init()
 
     # Check if tables exist by trying to query
+    needs_seed = False
     try:
-        from app.models import User
+        from app.models import User, Course, Blog
 
-        User.query.first()
-        print("✓ Database already initialized")
+        # Check if database is empty
+        user_count = User.query.count()
+        course_count = Course.query.count()
+        blog_count = Blog.query.count()
+
+        if user_count == 0 and course_count == 0 and blog_count == 0:
+            needs_seed = True
+            print("Database is empty, will seed after migrations")
+        else:
+            print(
+                f"✓ Database already has data ({user_count} users, {course_count} courses, {blog_count} blogs)"
+            )
     except:
         print("Setting up database...")
+        needs_seed = True
         try:
             migrate(message="Initial migration")
         except:
@@ -34,8 +46,8 @@ with app.app_context():
         upgrade()
         print("✓ Database schema created")
 
-        # Seed data
+    # Seed data if needed
+    if needs_seed:
         print("Seeding database...")
-        from app import seed
-
+        exec(open("app/seed.py").read())
         print("✓ Database seeded")
