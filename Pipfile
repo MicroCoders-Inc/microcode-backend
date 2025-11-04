@@ -13,6 +13,7 @@ colorama = "*"
 pyjwt = "*"
 gunicorn = "*"
 psycopg2-binary = "*"
+faker = "*"
 
 [dev-packages]
 pytest = "*"
