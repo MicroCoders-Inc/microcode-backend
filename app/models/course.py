@@ -31,6 +31,10 @@ class Course(db.Model):
         MutableDict.as_mutable(JSON),
         nullable=True,
     )
+    content: Mapped[dict[str, Any] | None] = mapped_column(
+        MutableDict.as_mutable(JSON),
+        nullable=True,
+    )
     image_url: Mapped[str | None] = mapped_column(String(255), nullable=True)
     image_alt: Mapped[str | None] = mapped_column(String(255), nullable=True)
     updated_at: Mapped[datetime] = mapped_column(
@@ -44,17 +48,18 @@ class Course(db.Model):
         return {
             "id": self.id,
             "name": self.name,
-            "price": self.price,
-            "discount": self.discount,
-            "topic": self.topic,
+            "price": float(self.price),
+            "discount": float(self.discount),
             "level": self.level,
-            "description": self.description,
             "tags": self.tags,
+            "description": self.description,
             "summary": self.summary,
             "image_url": self.image_url,
             "image_alt": self.image_alt,
-            "updated_at": self.updated_at,
-            "created_at": self.created_at,
+            "topic": self.topic,
+            "content": self.content,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
         }
 
     def __repr__(self):

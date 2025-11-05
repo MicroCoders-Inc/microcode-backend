@@ -31,7 +31,7 @@ class Blog(db.Model):
         return {
             "id": self.id,
             "title": self.title,
-            "publication_date": self.publication_date,
+            "publication_date": self.publication_date.isoformat() if self.publication_date else None,
             "author_name": self.author_name,
             "email": self.email,
             "url": self.url,
