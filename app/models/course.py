@@ -31,9 +31,9 @@ class Course(db.Model):
         MutableDict.as_mutable(JSON),
         nullable=True,
     )
-    content: Mapped[dict[str, Any] | None] = mapped_column(
-        MutableDict.as_mutable(JSON),
-        nullable=True,
+    content: Mapped[list[dict[str, Any]] | None] = mapped_column(
+        MutableList.as_mutable(JSON), 
+        nullable=True, 
     )
     image_url: Mapped[str | None] = mapped_column(String(255), nullable=True)
     image_alt: Mapped[str | None] = mapped_column(String(255), nullable=True)

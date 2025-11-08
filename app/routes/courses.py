@@ -16,6 +16,15 @@ def get_courses():
         }
     )
 
+@courses_bp.route("/courses/<int:course_id>", methods=["GET"])
+def get_course_by_id(course_id):
+    try:
+        course = Course.query.get_or_404(course_id)
+        return jsonify(course.to_dict()), 200
+
+    except Exception as e:
+        return jsonify({"error": f"An error occurred while retrieving the course: {str(e)}"}), 500
+
 
 @courses_bp.route("/courses", methods=["POST"])
 def create_course():
