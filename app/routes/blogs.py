@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from app.database import db
 from app.models import Blog
 from app.validation import validate_email, validate_string_field
-from app.constants import MAX_BLOG_TITLE_LENGTH, MAX_BLOG_DESCRIPTION_LENGTH
+from app.constants import MAX_BLOG_TITLE_LENGTH, MAX_BLOG_DESCRIPTION_LENGTH, MAX_BLOG_CONTENT_LENGTH
 
 blogs_bp = Blueprint("blogs", __name__)
 
@@ -12,6 +12,12 @@ blogs_bp = Blueprint("blogs", __name__)
 def get_blogs():
     blogs = Blog.query.order_by(Blog.publication_date.desc()).all()
     return jsonify([blog.to_dict() for blog in blogs])
+
+
+@blogs_bp.route("/blogs/<int:blog_id>", methods=["GET"])
+def get_blog(blog_id):
+    blog = Blog.query.get_or_404(blog_id)
+    return jsonify(blog.to_dict()), 200
 
 
 @blogs_bp.route("/blogs", methods=["POST"])
@@ -47,6 +53,13 @@ def create_blog():
     if not is_valid:
         return jsonify({"error": error}), 400
 
+    # Validate content (NUEVO)
+    is_valid, error = validate_string_field(
+        data.get("content"), "Content", MAX_BLOG_CONTENT_LENGTH
+    )
+    if not is_valid:
+        return jsonify({"error": error}), 400
+
     try:
         new_blog = Blog(
             title=data.get("title"),
@@ -54,6 +67,7 @@ def create_blog():
             email=data.get("email"),
             url=data.get("url"),
             description=data.get("description"),
+            content=data.get("content"),  # NUEVO
             tags=data.get("tags", []),
             image_url=data.get("image_url"),
             image_alt=data.get("image_alt"),
@@ -115,6 +129,15 @@ def update_blog(blog_id):
             if not is_valid:
                 return jsonify({"error": error}), 400
             blog.description = data["description"]
+
+        # Validate and update content (NUEVO)
+        if "content" in data:
+            is_valid, error = validate_string_field(
+                data.get("content"), "Content", MAX_BLOG_CONTENT_LENGTH
+            )
+            if not is_valid:
+                return jsonify({"error": error}), 400
+            blog.content = data["content"]
 
         if "tags" in data:
             blog.tags = data["tags"]
