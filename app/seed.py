@@ -5,6 +5,7 @@ from faker import Faker
 from decimal import Decimal
 from werkzeug.security import generate_password_hash
 import random
+import os
 
 fake = Faker()
 app = create_app()
@@ -1004,24 +1005,28 @@ with app.app_context():
 
     db.session.commit()
 
-    # Create permanent admin user
-    admin_email = "admin@microcode.com"
+    # Create permanent admin user using environment variables
+    admin_username = os.getenv("ADMIN_USERNAME", "admin")
+    admin_email = os.getenv("ADMIN_EMAIL", "admin@example.com")
+    admin_password = os.getenv("ADMIN_PASSWORD", "admin123")
+
     admin_user = User.query.filter_by(email=admin_email).first()
 
     if not admin_user:
-        print("Creating admin user...")
+        print(f"Creating admin user ({admin_email})...")
         db.session.add(
             User(
-                username="microcode_admin",
+                username=admin_username,
                 email=admin_email,
-                password_hash=generate_password_hash("iamadmin123"),
+                password_hash=generate_password_hash(admin_password),
+                role="admin",
                 owned_courses=all_course_ids,  # Admin owns all courses
                 favourite_courses=[],
                 saved_blogs=[],
             )
         )
         db.session.commit()
-        print("✓ Admin user created (admin@microcode.com)")
+        print(f"✓ Admin user created ({admin_email})")
     else:
         print("✓ Admin user already exists")
 

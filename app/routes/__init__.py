@@ -6,6 +6,7 @@ from app.routes.courses import courses_bp
 from app.routes.blogs import blogs_bp
 from app.routes.contacts import contacts_bp
 from app.routes.upload import upload_bp
+from app.routes.purchases import purchases_bp
 
 
 def register_blueprints(app):
@@ -17,3 +18,4 @@ def register_blueprints(app):
     app.register_blueprint(blogs_bp)
     app.register_blueprint(contacts_bp)
     app.register_blueprint(upload_bp)
+    app.register_blueprint(purchases_bp)
