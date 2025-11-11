@@ -33,7 +33,9 @@ def create_app():
     def serve_static(filename):
         return send_from_directory(app.static_folder, filename)
 
-    with app.app_context():
-        db.create_all()
+    # NOTE: Database schema is now managed by migrations
+    # db.create_all() is no longer needed
+    # with app.app_context():
+    #     db.create_all()
 
     return app

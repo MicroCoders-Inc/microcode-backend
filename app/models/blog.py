@@ -24,7 +24,7 @@ class Blog(db.Model):
         nullable=False,
         default=list,
     )
-    content: Mapped[str] = mapped_column(Text, nullable=False)  
+    content: Mapped[str | None] = mapped_column(Text, nullable=True)  
     image_url: Mapped[str | None] = mapped_column(String(255), nullable=True)
     image_alt: Mapped[str | None] = mapped_column(String(255), nullable=True)
     image_header: Mapped[str | None] = mapped_column(String(255), nullable=True)

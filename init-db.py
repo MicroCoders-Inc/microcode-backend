@@ -18,7 +18,17 @@ with app.app_context():
         print("Initializing Flask-Migrate...")
         init()
 
-    # Check if tables exist by trying to query
+    # ALWAYS run migrations first to ensure schema is up to date
+    print("Running database migrations...")
+    try:
+        upgrade()
+        print("✓ Database schema is up to date")
+    except Exception as e:
+        print(f"Migration error: {e}")
+        # Continue anyway - might already be at latest version
+
+    # NOW check if we need to seed data
+    # This is safe because migrations have already run
     needs_seed = False
     try:
         from app.models import User, Course, Blog
@@ -30,24 +40,22 @@ with app.app_context():
 
         if user_count == 0 and course_count == 0 and blog_count == 0:
             needs_seed = True
-            print("Database is empty, will seed after migrations")
+            print("Database is empty, will seed data")
         else:
             print(
                 f"✓ Database already has data ({user_count} users, {course_count} courses, {blog_count} blogs)"
             )
-    except:
-        print("Setting up database...")
+    except Exception as e:
+        print(f"Error checking database: {e}")
+        # If we can't check, assume we need to seed
         needs_seed = True
-        try:
-            migrate(message="Initial migration")
-        except:
-            print("Migration already exists or not needed")
-
-        upgrade()
-        print("✓ Database schema created")
 
     # Seed data if needed
     if needs_seed:
         print("Seeding database...")
-        exec(open("app/seed.py").read())
-        print("✓ Database seeded")
+        try:
+            exec(open("app/seed.py").read())
+            print("✓ Database seeded successfully")
+        except Exception as e:
+            print(f"Error seeding database: {e}")
+            raise
