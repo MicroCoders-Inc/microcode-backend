@@ -14,6 +14,8 @@ pyjwt = "*"
 gunicorn = "*"
 psycopg2-binary = "*"
 faker = "*"
+weasyprint = "==63.1"
+markdown = "==3.7"
 
 [dev-packages]
 pytest = "*"

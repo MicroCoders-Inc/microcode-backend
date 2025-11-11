@@ -11,28 +11,60 @@ fake = Faker()
 app = create_app()
 
 TAG_COLOR_REGISTRY = {
+    # Languages & Frameworks
     "HTML": "#E34F26",
     "CSS": "#1572B6",
-    "JavaScript": "#F7DF1E",
-    "React": "#61DAFB",
-    "JSX": "#61DAFB",
+    "JavaScript": "#D4A017",
+    "React": "#0088CC",
+    "JSX": "#0088CC",
     "Bootstrap": "#7952B3",
-    "Tailwind": "#06B6D4",
+    "Tailwind": "#0891B2",
     "Python": "#3776AB",
     "Flask": "#000000",
     "Node.js": "#339933",
     "Express.js": "#000000",
-    "REST API": "#0D6EFD",
-    "Auth": "#DC3545",
     "Django": "#092E20",
+
+    # Databases & ORM
     "SQL": "#0064A5",
     "PostgreSQL": "#4169E1",
     "SQLite": "#003B57",
     "SQLAlchemy": "#D71F00",
     "ORM": "#6C757D",
+
+    # Git & Version Control
     "Git": "#F05032",
     "GitHub": "#181717",
     "CLI": "#4EAA25",
+
+    # Backend & API
+    "REST API": "#0D6EFD",
+    "Auth": "#DC3545",
+    "JWT": "#E74C3C",
+    "Routes": "#0C7FB5",
+
+    # Frontend Concepts
+    "Mobile": "#28A745",
+    "Styling": "#8E44AD",
+    "Events": "#E67E22",
+    "DOM": "#C0392B",
+    "Semantic": "#16A085",
+
+    # Database Concepts
+    "Design": "#229954",
+    "Queries": "#0E8E77",
+    "Relations": "#9B59B6",
+    "Schema": "#34495E",
+    "CRUD": "#E67E22",
+    "Trans": "#D35400",
+
+    # Git Workflow
+    "VCS": "#E67E22",
+    "Workflow": "#2980B9",
+    "Branch": "#9B59B6",
+    "Merge": "#0E8E77",
+    "Teams": "#1E8449",
+    "Remote": "#0C7FB5",
 }
 
 # Course definitions - 10 per topic with complete data

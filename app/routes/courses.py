@@ -1,7 +1,9 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, send_file
 from sqlalchemy.exc import IntegrityError
-from app.models import Course
+from app.models import Course, User
 from app.database import db
+from app.auth_middleware import token_required
+from app.pdf_generator import generate_course_pdf
 
 courses_bp = Blueprint("courses", __name__)
 
@@ -24,6 +26,50 @@ def get_course_by_id(course_id):
 
     except Exception as e:
         return jsonify({"error": f"An error occurred while retrieving the course: {str(e)}"}), 500
+
+
+@courses_bp.route("/courses/<int:course_id>/download-pdf", methods=["GET"])
+@token_required
+def download_course_pdf(current_user_id, course_id):
+    """
+    Download course as PDF - only accessible to course owners
+    Accepts optional 'theme' query parameter: 'light' (default) or 'dark'
+    """
+    try:
+        # Get theme from query parameter, default to 'light'
+        theme = request.args.get('theme', 'light')
+        if theme not in ['light', 'dark']:
+            theme = 'light'
+
+        # Get the course
+        course = Course.query.get_or_404(course_id)
+
+        # Get the current user
+        user = User.query.get(current_user_id)
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+
+        # Check if user owns the course
+        owned_courses = user.owned_courses or []
+        if course_id not in owned_courses:
+            return jsonify({"error": "You must own this course to download it as PDF"}), 403
+
+        # Generate PDF with theme
+        pdf_file = generate_course_pdf(course.to_dict(), theme=theme)
+
+        # Create a safe filename with theme indicator
+        safe_filename = f"{course.name.replace(' ', '_')}_{theme}.pdf"
+
+        # Send the PDF file
+        return send_file(
+            pdf_file,
+            mimetype='application/pdf',
+            as_attachment=True,
+            download_name=safe_filename
+        )
+
+    except Exception as e:
+        return jsonify({"error": f"An error occurred while generating the PDF: {str(e)}"}), 500
 
 
 @courses_bp.route("/courses", methods=["POST"])
