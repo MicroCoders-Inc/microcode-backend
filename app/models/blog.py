@@ -27,6 +27,7 @@ class Blog(db.Model):
     content: Mapped[str] = mapped_column(Text, nullable=False)  
     image_url: Mapped[str | None] = mapped_column(String(255), nullable=True)
     image_alt: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    image_header: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     def to_dict(self):
         return {
@@ -41,6 +42,7 @@ class Blog(db.Model):
             "content": self.content,
             "image_url": self.image_url,
             "image_alt": self.image_alt,
+            "image_header": self.image_header,
         }
 
     def __repr__(self):
