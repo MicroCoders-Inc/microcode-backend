@@ -17,7 +17,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate, upgrade
 from app.database import db
-from app.models import User, Course, Blog, Shop, Article, Contact, Purchase
+from app.models import User, Course, Blog, Contact, Purchase
 
 def create_tables_in_target(target_db_url):
     """

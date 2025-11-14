@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 from app.database import db
 from app.models import User
-from app.auth_middleware import token_required
+from app.auth_middleware import token_required, verify_user_authorization
 
 
 users_bp = Blueprint("users", __name__)
@@ -75,8 +75,9 @@ def create_user():
 def get_user_profile(current_user_id, user_id):
     """Get user profile with expanded course and blog details"""
     # Verify user can only access their own profile
-    if current_user_id != user_id:
-        return jsonify({"error": "Unauthorized: You can only access your own profile"}), 403
+    error = verify_user_authorization(current_user_id, user_id, "access your own profile")
+    if error:
+        return error
 
     user = User.query.get_or_404(user_id)
 
@@ -104,8 +105,9 @@ def get_owned_courses(user_id):
 @token_required
 def add_owned_course(current_user_id, user_id):
     # Verify user can only modify their own data
-    if current_user_id != user_id:
-        return jsonify({"error": "Unauthorized: You can only modify your own courses"}), 403
+    error = verify_user_authorization(current_user_id, user_id, "modify your own courses")
+    if error:
+        return error
 
     user = User.query.get_or_404(user_id)
     data = request.get_json()
@@ -131,8 +133,9 @@ def add_owned_course(current_user_id, user_id):
 @token_required
 def remove_owned_course(current_user_id, user_id, course_id):
     # Verify user can only modify their own data
-    if current_user_id != user_id:
-        return jsonify({"error": "Unauthorized: You can only modify your own courses"}), 403
+    error = verify_user_authorization(current_user_id, user_id, "modify your own courses")
+    if error:
+        return error
 
     user = User.query.get_or_404(user_id)
 
@@ -162,8 +165,9 @@ def get_favourite_courses(user_id):
 @token_required
 def add_favourite_course(current_user_id, user_id):
     # Verify user can only modify their own data
-    if current_user_id != user_id:
-        return jsonify({"error": "Unauthorized: You can only modify your own favourites"}), 403
+    error = verify_user_authorization(current_user_id, user_id, "modify your own favourites")
+    if error:
+        return error
 
     user = User.query.get_or_404(user_id)
     data = request.get_json()
@@ -189,8 +193,9 @@ def add_favourite_course(current_user_id, user_id):
 @token_required
 def remove_favourite_course(current_user_id, user_id, course_id):
     # Verify user can only modify their own data
-    if current_user_id != user_id:
-        return jsonify({"error": "Unauthorized: You can only modify your own favourites"}), 403
+    error = verify_user_authorization(current_user_id, user_id, "modify your own favourites")
+    if error:
+        return error
 
     user = User.query.get_or_404(user_id)
 
@@ -218,8 +223,9 @@ def get_saved_blogs(user_id):
 @token_required
 def add_saved_blog(current_user_id, user_id):
     # Verify user can only modify their own data
-    if current_user_id != user_id:
-        return jsonify({"error": "Unauthorized: You can only modify your own saved blogs"}), 403
+    error = verify_user_authorization(current_user_id, user_id, "modify your own saved blogs")
+    if error:
+        return error
 
     user = User.query.get_or_404(user_id)
     data = request.get_json()
@@ -243,8 +249,9 @@ def add_saved_blog(current_user_id, user_id):
 @token_required
 def remove_saved_blog(current_user_id, user_id, blog_id):
     # Verify user can only modify their own data
-    if current_user_id != user_id:
-        return jsonify({"error": "Unauthorized: You can only modify your own saved blogs"}), 403
+    error = verify_user_authorization(current_user_id, user_id, "modify your own saved blogs")
+    if error:
+        return error
 
     user = User.query.get_or_404(user_id)
 
@@ -277,8 +284,9 @@ def get_user(user_id):
 @token_required
 def delete_user(current_user_id, user_id):
     # Verify user can only delete their own account
-    if current_user_id != user_id:
-        return jsonify({"error": "Unauthorized: You can only delete your own account"}), 403
+    error = verify_user_authorization(current_user_id, user_id, "delete your own account")
+    if error:
+        return error
 
     user = User.query.get_or_404(user_id)
     if user_id != 1:

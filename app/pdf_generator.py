@@ -8,6 +8,9 @@ import markdown
 import html
 import re
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def generate_course_pdf(course_data, theme='light'):
@@ -35,9 +38,7 @@ def generate_course_pdf(course_data, theme='light'):
         return pdf_file
     except Exception as e:
         # Log the error with details for debugging
-        import traceback
-        print(f"PDF Generation Error: {str(e)}")
-        print(traceback.format_exc())
+        logger.error(f"PDF Generation Error: {str(e)}", exc_info=True)
         raise Exception(f"PDF generation failed: {str(e)}")
 
 

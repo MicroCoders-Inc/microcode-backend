@@ -4,6 +4,7 @@ Purchase routes for course purchasing functionality
 
 from datetime import datetime
 from flask import Blueprint, request, jsonify
+from sqlalchemy.orm import joinedload
 from app.database import db
 from app.models import User, Course, Purchase
 from app.auth_middleware import token_required
@@ -126,18 +127,22 @@ def get_user_purchases(current_user_id):
     try:
         expand = request.args.get('expand', 'false').lower() == 'true'
 
-        # Get all purchases for this user
-        purchases = Purchase.query.filter_by(user_id=current_user_id).all()
+        # Get all purchases for this user with eager loading to avoid N+1 queries
+        query = Purchase.query.filter_by(user_id=current_user_id)
+
+        if expand:
+            # Use joinedload to fetch courses in a single query
+            query = query.options(joinedload(Purchase.course))
+
+        purchases = query.all()
 
         result = []
         for purchase in purchases:
             purchase_dict = purchase.to_dict()
 
-            if expand:
-                # Include full course details
-                course = Course.query.get(purchase.course_id)
-                if course:
-                    purchase_dict['course'] = course.to_dict()
+            if expand and purchase.course:
+                # Course is already loaded from joinedload
+                purchase_dict['course'] = purchase.course.to_dict()
 
             result.append(purchase_dict)
 

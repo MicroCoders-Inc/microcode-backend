@@ -9,6 +9,65 @@ import os
 from app.models import User
 
 
+def verify_user_authorization(current_user_id, target_user_id, action_description="access this resource"):
+    """
+    Helper function to verify that the current user is authorized to perform an action
+    on the target user's resource.
+
+    Args:
+        current_user_id: ID of the currently authenticated user
+        target_user_id: ID of the user whose resource is being accessed
+        action_description: Description of the action for error message
+
+    Returns:
+        None if authorized, or (error_dict, status_code) tuple if not authorized
+    """
+    if current_user_id != target_user_id:
+        return jsonify({"error": f"Unauthorized: You can only {action_description}"}), 403
+    return None
+
+
+def _extract_and_validate_token():
+    """
+    Helper function to extract and validate JWT token from request headers.
+
+    Returns:
+        tuple: (user_id, error_response)
+        - If successful: (user_id, None)
+        - If failed: (None, (error_dict, status_code))
+    """
+    token = None
+
+    # Check if Authorization header exists
+    if 'Authorization' in request.headers:
+        auth_header = request.headers['Authorization']
+        # Expected format: "Bearer <token>"
+        try:
+            token = auth_header.split(" ")[1]
+        except IndexError:
+            return None, (jsonify({'error': 'Invalid token format. Use: Bearer <token>'}), 401)
+
+    if not token:
+        return None, (jsonify({'error': 'Authentication token is missing'}), 401)
+
+    try:
+        # Decode the token
+        secret_key = os.environ.get('SECRET_KEY')
+        if not secret_key:
+            return None, (jsonify({'error': 'Server configuration error'}), 500)
+
+        data = jwt.decode(token, secret_key, algorithms=["HS256"])
+        current_user_id = data['user_id']
+        return current_user_id, None
+
+    except jwt.ExpiredSignatureError:
+        return None, (jsonify({'error': 'Token has expired'}), 401)
+    except jwt.InvalidTokenError:
+        return None, (jsonify({'error': 'Invalid token'}), 401)
+    except Exception:
+        return None, (jsonify({'error': 'Token validation failed'}), 401)
+
+
 def token_required(f):
     """
     Decorator to protect routes that require authentication.
@@ -22,35 +81,9 @@ def token_required(f):
     """
     @wraps(f)
     def decorated(*args, **kwargs):
-        token = None
-
-        # Check if Authorization header exists
-        if 'Authorization' in request.headers:
-            auth_header = request.headers['Authorization']
-            # Expected format: "Bearer <token>"
-            try:
-                token = auth_header.split(" ")[1]
-            except IndexError:
-                return jsonify({'error': 'Invalid token format. Use: Bearer <token>'}), 401
-
-        if not token:
-            return jsonify({'error': 'Authentication token is missing'}), 401
-
-        try:
-            # Decode the token
-            secret_key = os.environ.get('SECRET_KEY')
-            if not secret_key:
-                return jsonify({'error': 'Server configuration error'}), 500
-
-            data = jwt.decode(token, secret_key, algorithms=["HS256"])
-            current_user_id = data['user_id']
-
-        except jwt.ExpiredSignatureError:
-            return jsonify({'error': 'Token has expired'}), 401
-        except jwt.InvalidTokenError:
-            return jsonify({'error': 'Invalid token'}), 401
-        except Exception as e:
-            return jsonify({'error': 'Token validation failed'}), 401
+        current_user_id, error = _extract_and_validate_token()
+        if error:
+            return error
 
         # Pass the user_id to the route
         return f(current_user_id, *args, **kwargs)
@@ -75,19 +108,10 @@ def token_optional(f):
     """
     @wraps(f)
     def decorated(*args, **kwargs):
-        current_user_id = None
-
-        if 'Authorization' in request.headers:
-            auth_header = request.headers['Authorization']
-            try:
-                token = auth_header.split(" ")[1]
-                secret_key = os.environ.get('SECRET_KEY')
-                if secret_key:
-                    data = jwt.decode(token, secret_key, algorithms=["HS256"])
-                    current_user_id = data['user_id']
-            except:
-                # Invalid token, but that's okay for optional auth
-                pass
+        current_user_id, _ = _extract_and_validate_token()
+        # Ignore errors - optional auth means we accept None
+        if current_user_id is None:
+            current_user_id = None  # Explicit for clarity
 
         return f(current_user_id, *args, **kwargs)
 
@@ -109,35 +133,9 @@ def admin_required(f):
     """
     @wraps(f)
     def decorated(*args, **kwargs):
-        token = None
-
-        # Check if Authorization header exists
-        if 'Authorization' in request.headers:
-            auth_header = request.headers['Authorization']
-            # Expected format: "Bearer <token>"
-            try:
-                token = auth_header.split(" ")[1]
-            except IndexError:
-                return jsonify({'error': 'Invalid token format. Use: Bearer <token>'}), 401
-
-        if not token:
-            return jsonify({'error': 'Authentication token is missing'}), 401
-
-        try:
-            # Decode the token
-            secret_key = os.environ.get('SECRET_KEY')
-            if not secret_key:
-                return jsonify({'error': 'Server configuration error'}), 500
-
-            data = jwt.decode(token, secret_key, algorithms=["HS256"])
-            current_user_id = data['user_id']
-
-        except jwt.ExpiredSignatureError:
-            return jsonify({'error': 'Token has expired'}), 401
-        except jwt.InvalidTokenError:
-            return jsonify({'error': 'Invalid token'}), 401
-        except Exception as e:
-            return jsonify({'error': 'Token validation failed'}), 401
+        current_user_id, error = _extract_and_validate_token()
+        if error:
+            return error
 
         # Check if user exists and has admin role
         user = User.query.get(current_user_id)

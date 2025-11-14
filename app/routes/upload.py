@@ -1,14 +1,16 @@
 import os
 import uuid
+import logging
 from flask import Blueprint, jsonify, request
 from werkzeug.utils import secure_filename
 from app.database import db
 from app.models import User
-from app.auth_middleware import token_required
+from app.auth_middleware import token_required, verify_user_authorization
 
 from app.constants import MAX_FILE_SIZE, ALLOWED_IMAGE_EXTENSIONS
 
 upload_bp = Blueprint("upload", __name__)
+logger = logging.getLogger(__name__)
 
 # Configuration
 UPLOAD_FOLDER = "app/static/uploads/profile_pictures"
@@ -26,8 +28,9 @@ def allowed_file(filename):
 @token_required
 def upload_profile_picture(current_user_id, user_id):
     # Verify user can only upload their own profile picture
-    if current_user_id != user_id:
-        return jsonify({"error": "Unauthorized: You can only upload your own profile picture"}), 403
+    error = verify_user_authorization(current_user_id, user_id, "upload your own profile picture")
+    if error:
+        return error
 
     # Check if user exists
     user = User.query.get_or_404(user_id)
@@ -77,7 +80,7 @@ def upload_profile_picture(current_user_id, user_id):
             try:
                 os.remove(old_filepath)
             except Exception as e:
-                print(f"Error deleting old profile picture: {e}")
+                logger.warning(f"Error deleting old profile picture: {e}")
 
     # Save file
     try:
@@ -106,8 +109,9 @@ def upload_profile_picture(current_user_id, user_id):
 @token_required
 def delete_profile_picture(current_user_id, user_id):
     # Verify user can only delete their own profile picture
-    if current_user_id != user_id:
-        return jsonify({"error": "Unauthorized: You can only delete your own profile picture"}), 403
+    error = verify_user_authorization(current_user_id, user_id, "delete your own profile picture")
+    if error:
+        return error
 
     user = User.query.get_or_404(user_id)
 

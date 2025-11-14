@@ -10,7 +10,13 @@ from app.constants import JWT_EXPIRATION_DAYS
 
 auth_bp = Blueprint("auth", __name__)
 
-SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-here")
+# Get SECRET_KEY from environment - fail fast if not set
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError(
+        "SECRET_KEY environment variable is not set! "
+        "Set it before starting the application for security."
+    )
 
 
 @auth_bp.route("/signup", methods=["POST"])

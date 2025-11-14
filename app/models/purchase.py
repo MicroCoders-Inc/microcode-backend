@@ -1,7 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 from sqlalchemy import String, DateTime, Numeric, ForeignKey, func, Integer
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import db
 import secrets
 
@@ -10,8 +10,8 @@ class Purchase(db.Model):
     __tablename__ = "purchases"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
-    course_id: Mapped[int] = mapped_column(ForeignKey("course.id"), nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
+    course_id: Mapped[int] = mapped_column(ForeignKey("course.id"), nullable=False, index=True)
     price_paid: Mapped[Decimal] = mapped_column(
         Numeric(precision=6, scale=2), nullable=False
     )
@@ -27,6 +27,9 @@ class Purchase(db.Model):
     purchase_date: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
+
+    # Relationships for eager loading
+    course = relationship("Course", foreign_keys=[course_id], lazy='select')
 
     @staticmethod
     def generate_invoice_number():

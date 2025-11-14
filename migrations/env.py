@@ -38,7 +38,7 @@ def get_engine_url():
 # target_metadata = mymodel.Base.metadata
 
 # Import all models so Alembic can detect them
-from app.models import User, Course, Blog, Shop, Article, Contact, Purchase
+from app.models import User, Course, Blog, Contact, Purchase
 
 config.set_main_option('sqlalchemy.url', get_engine_url())
 target_db = current_app.extensions['migrate'].db

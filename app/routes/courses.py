@@ -191,48 +191,25 @@ def delete_course(course_id):
         return jsonify({"error": f"An error occurred while deleting the course: {str(e)}"}), 500
 
 
-@courses_bp.route("/courses/frontend", methods=["GET"])
-def get_frontend_courses():
-    courses = Course.query.filter_by(topic="frontend").all()
+# Consolidated route for filtering courses by topic
+@courses_bp.route("/courses/<topic>", methods=["GET"])
+def get_courses_by_topic(topic):
+    """
+    Get courses filtered by topic.
+    Valid topics: frontend, backend, database, git
+
+    This route handles all topic-based filtering in one place,
+    eliminating code duplication.
+    """
+    # Validate topic (optional: you could also just let the query return empty list)
+    valid_topics = ["frontend", "backend", "database", "git"]
+    if topic not in valid_topics:
+        return jsonify({"error": f"Invalid topic. Valid topics: {', '.join(valid_topics)}"}), 400
+
+    courses = Course.query.filter_by(topic=topic).all()
     return jsonify(
         {
-            "topic": "frontend",
-            "count": len(courses),
-            "courses": [course.to_dict() for course in courses],
-        }
-    )
-
-
-@courses_bp.route("/courses/backend", methods=["GET"])
-def get_backend_courses():
-    courses = Course.query.filter_by(topic="backend").all()
-    return jsonify(
-        {
-            "topic": "backend",
-            "count": len(courses),
-            "courses": [course.to_dict() for course in courses],
-        }
-    )
-
-
-@courses_bp.route("/courses/database", methods=["GET"])
-def get_database_courses():
-    courses = Course.query.filter_by(topic="database").all()
-    return jsonify(
-        {
-            "topic": "database",
-            "count": len(courses),
-            "courses": [course.to_dict() for course in courses],
-        }
-    )
-
-
-@courses_bp.route("/courses/git", methods=["GET"])
-def get_git_courses():
-    courses = Course.query.filter_by(topic="git").all()
-    return jsonify(
-        {
-            "topic": "git",
+            "topic": topic,
             "count": len(courses),
             "courses": [course.to_dict() for course in courses],
         }
